@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Fitness OS",
+  title: "Samjutdar.ai",
   description: "AI-assisted fitness management and body transformation dashboard",
   keywords: ["fitness", "ai", "tracking", "wellness"],
 };
