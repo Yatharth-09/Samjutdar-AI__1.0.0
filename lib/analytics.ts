@@ -4,6 +4,8 @@ import type {
   RecoveryMetrics,
 } from '@/types/analytics';
 import type { Task, TasksByDate } from '@/types/task';
+import type { BodyTransformationMode } from '@/types/mode';
+import { MODE_CONFIGS } from './constants';
 
 /**
  * Analytics calculation logic
@@ -55,7 +57,8 @@ export const getDailyMetrics = (tasks: Task[]): DailyMetrics | null => {
 
 export const getWeeklyAnalytics = (
   allTasks: TasksByDate,
-  dateOverride?: Date
+  dateOverride?: Date,
+  mode?: BodyTransformationMode
 ): WeeklyAnalytics => {
   const now = dateOverride || new Date();
   const weekStart = getWeekStart(now);
@@ -99,7 +102,7 @@ export const getWeeklyAnalytics = (
       ? Math.round(totalCompletionRate / dailyMetrics.length)
       : 0;
 
-  const streak = calculateStreak(allTasks);
+  const streak = calculateStreak(allTasks, mode);
 
   return {
     weekStart,
@@ -113,7 +116,10 @@ export const getWeeklyAnalytics = (
   };
 };
 
-export const calculateStreak = (allTasks: TasksByDate): number => {
+export const calculateStreak = (
+  allTasks: TasksByDate,
+  mode?: BodyTransformationMode
+): number => {
   let streak = 0;
   const today = new Date();
   const checkDate = new Date(today);
@@ -126,10 +132,25 @@ export const calculateStreak = (allTasks: TasksByDate): number => {
       break;
     }
 
-    const completed = tasksForDay.filter((t) => t.done).length;
-    const total = tasksForDay.length;
+    // Strength workouts ALWAYS count toward streaks
+    const hasWorkout = tasksForDay.some((t) => t.category === 'Workout' && t.done);
 
-    if (completed === total && total > 0) {
+    // For streak, require either strength done OR 80% primary focus done
+    let countsAsActiveDay = hasWorkout;
+
+    if (!countsAsActiveDay && mode) {
+      const modeConfig = MODE_CONFIGS[mode];
+      const primaryTasks = tasksForDay.filter((t) =>
+        modeConfig.primaryCategories.includes(t.category)
+      );
+      const primaryCompleted = primaryTasks.filter((t) => t.done).length;
+
+      if (primaryTasks.length > 0 && primaryCompleted / primaryTasks.length >= 0.8) {
+        countsAsActiveDay = true;
+      }
+    }
+
+    if (countsAsActiveDay) {
       streak++;
       checkDate.setDate(checkDate.getDate() - 1);
     } else {
@@ -142,9 +163,9 @@ export const calculateStreak = (allTasks: TasksByDate): number => {
 
 export const getRecoveryMetrics = (
   allTasks: TasksByDate,
-  mode: 'fatloss' | 'muscle' | 'maintenance'
+  mode: BodyTransformationMode
 ): RecoveryMetrics => {
-  const weeklyData = getWeeklyAnalytics(allTasks);
+  const weeklyData = getWeeklyAnalytics(allTasks, undefined, mode);
   const recoveryTasks = allTasks[getDateString(new Date())]?.filter(
     (t) => t.category === 'Recovery'
   ) || [];

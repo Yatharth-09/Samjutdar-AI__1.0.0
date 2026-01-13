@@ -46,7 +46,7 @@ export function useAnalytics(
     }
 
     // Calculate new analytics
-    const weekly = getWeeklyAnalytics(allTasks);
+    const weekly = getWeeklyAnalytics(allTasks, undefined, currentMode);
     const recovery = getRecoveryMetrics(allTasks, currentMode);
 
     const newAnalytics: AnalyticsState = {

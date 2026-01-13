@@ -6,12 +6,12 @@ import { BodyMode } from '@/components/dashboard/BodyMode';
 import { TaskInput } from '@/components/dashboard/TaskInput';
 import { TaskList } from '@/components/dashboard/TaskList';
 import { AICoach } from '@/components/dashboard/AICoach';
-import { WeeklyChart } from '@/components/dashboard/WeeklyChart';
-import { RecoveryScore } from '@/components/dashboard/RecoveryScore';
-import { getTasks, saveTasks, getCurrentMode, saveCurrentMode } from '@/lib/storage';
+import { WeeklyPlanner } from '@/components/dashboard/WeeklyPlanner';
+import { getTasks, saveTasks, getCurrentMode, saveCurrentMode, getWeeklyTasks, saveWeeklyTasks } from '@/lib/storage';
 import { getDateString } from '@/lib/analytics';
 import { generateCoachFeedback, selectCoachMessage } from '@/lib/ai';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import { generateDailyTasksFromWeekly } from '@/lib/weeklyTaskGenerator';
+import { handleModeTransition } from '@/lib/modeTransition';
 import type { Task, TasksByDate } from '@/types/task';
 import type { BodyTransformationMode } from '@/types/mode';
 import type { CoachFeedback } from '@/lib/ai';
@@ -22,14 +22,22 @@ export default function Dashboard() {
   const [coachFeedback, setCoachFeedback] = useState<CoachFeedback | null>(null);
   const [isClient, setIsClient] = useState(false);
 
-  const analytics = useAnalytics(allTasks, currentMode);
-
   // Initialize from localStorage
   useEffect(() => {
     setIsClient(true);
     const tasks = getTasks();
     const mode = getCurrentMode();
-    setAllTasks(tasks);
+    const weeklyTasks = getWeeklyTasks();
+
+    // Generate daily tasks from weekly templates
+    const tasksWithGenerated = generateDailyTasksFromWeekly(weeklyTasks, tasks);
+
+    // Save if new tasks were generated
+    if (JSON.stringify(tasksWithGenerated) !== JSON.stringify(tasks)) {
+      saveTasks(tasksWithGenerated);
+    }
+
+    setAllTasks(tasksWithGenerated);
     setCurrentMode(mode);
   }, []);
 
@@ -97,8 +105,33 @@ export default function Dashboard() {
   };
 
   const handleModeChange = (mode: BodyTransformationMode) => {
+    // Get current weekly tasks
+    const weeklyTasks = getWeeklyTasks();
+    
+    // Handle mode transition (auto-pause old workouts, generate new ones)
+    const { updatedWeeklyTasks, newTaskCount, pausedTaskCount } = handleModeTransition(mode, weeklyTasks);
+    
+    // Save updated weekly tasks
+    saveWeeklyTasks(updatedWeeklyTasks);
+    
+    // Generate daily tasks from new weekly templates
+    const tasksWithGenerated = generateDailyTasksFromWeekly(updatedWeeklyTasks, allTasks);
+    
+    // Save if new tasks were generated
+    if (JSON.stringify(tasksWithGenerated) !== JSON.stringify(allTasks)) {
+      saveTasks(tasksWithGenerated);
+      setAllTasks(tasksWithGenerated);
+    }
+    
+    // Update mode
     setCurrentMode(mode);
     saveCurrentMode(mode);
+    
+    // Show notification if workouts were changed
+    if (newTaskCount > 0 || pausedTaskCount > 0) {
+      // Could add a toast notification here in the future
+      console.log(`Mode changed: ${pausedTaskCount} workouts paused, ${newTaskCount} new workouts added`);
+    }
   };
 
   const today = getDateString();
@@ -108,6 +141,9 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Mode Selector */}
       <BodyMode currentMode={currentMode} onModeChange={handleModeChange} />
+
+      {/* Weekly Planner */}
+      <WeeklyPlanner currentMode={currentMode} allTasks={allTasks} />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -128,10 +164,6 @@ export default function Dashboard() {
       </div>
 
       {/* Analytics Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <WeeklyChart data={analytics?.weekly || null} />
-        <RecoveryScore data={analytics?.recovery || null} />
-      </div>
     </div>
   );
 }

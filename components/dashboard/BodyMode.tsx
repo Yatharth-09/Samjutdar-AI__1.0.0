@@ -61,7 +61,13 @@ export const BodyMode: React.FC<BodyModeProps> = ({
             {modeConfig.description}
           </p>
           <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
-            Recovery Emphasis: {modeConfig.recoveryEmphasis}
+            <strong>Philosophy:</strong> {modeConfig.philosophy}
+          </p>
+          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+            <strong>Primary Focus:</strong> {modeConfig.primaryCategories.join(', ')}
+          </p>
+          <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+            <strong>Recovery Emphasis:</strong> {modeConfig.recoveryEmphasis}
           </p>
         </div>
       </CardBody>

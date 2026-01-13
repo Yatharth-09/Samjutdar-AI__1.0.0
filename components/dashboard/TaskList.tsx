@@ -44,6 +44,8 @@ export const TaskList: React.FC<TaskListProps> = ({
               className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
                 task.done
                   ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-60'
+                  : task.weeklyTaskId
+                  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700 hover:border-blue-400'
                   : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300'
               }`}
             >
@@ -55,15 +57,22 @@ export const TaskList: React.FC<TaskListProps> = ({
                   className="w-5 h-5 rounded cursor-pointer"
                 />
                 <div className="flex-1">
-                  <p
-                    className={`font-medium ${
-                      task.done
-                        ? 'text-gray-500 dark:text-gray-400 line-through'
-                        : 'text-gray-900 dark:text-white'
-                    }`}
-                  >
-                    {task.text}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p
+                      className={`font-medium ${
+                        task.done
+                          ? 'text-gray-500 dark:text-gray-400 line-through'
+                          : 'text-gray-900 dark:text-white'
+                      }`}
+                    >
+                      {task.text}
+                    </p>
+                    {task.weeklyTaskId && (
+                      <span className="text-xs px-2 py-0.5 bg-blue-500 text-white rounded">
+                        🔄 Recurring
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {CATEGORY_LABELS[task.category]}
                   </p>

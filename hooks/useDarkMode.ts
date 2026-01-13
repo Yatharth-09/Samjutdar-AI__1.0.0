@@ -19,11 +19,8 @@ export function useDarkMode(): [boolean, (isDark: boolean) => void] {
     setIsDark(saved);
 
     // Update document class for Tailwind dark mode
-    if (saved) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', saved);
+    document.documentElement.classList.toggle('light', !saved);
   }, []);
 
   const toggleDarkMode = (isDarkMode: boolean) => {
@@ -31,11 +28,8 @@ export function useDarkMode(): [boolean, (isDark: boolean) => void] {
     saveDarkMode(isDarkMode);
 
     // Update document class
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', isDarkMode);
+    document.documentElement.classList.toggle('light', !isDarkMode);
   };
 
   return [isDark, toggleDarkMode];

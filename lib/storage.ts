@@ -2,6 +2,8 @@ import { STORAGE_KEYS } from './constants';
 import type { Task, TasksByDate } from '@/types/task';
 import type { BodyTransformationMode } from '@/types/mode';
 import type { AnalyticsState } from '@/types/analytics';
+import type { WeeklyTasksState } from '@/types/weeklyTask';
+import type { WeeklyPlan } from '@/types/weeklyPlan';
 
 /**
  * Client-side localStorage abstraction
@@ -62,11 +64,43 @@ export const getAnalytics = (): AnalyticsState | null => {
   return stored ? JSON.parse(stored) : null;
 };
 
+// Weekly Tasks
+export const saveWeeklyTasks = (weeklyTasks: WeeklyTasksState): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEYS.WEEKLY_TASKS, JSON.stringify(weeklyTasks));
+  }
+};
+
+export const getWeeklyTasks = (): WeeklyTasksState => {
+  if (typeof window === 'undefined') return {};
+  const stored = localStorage.getItem(STORAGE_KEYS.WEEKLY_TASKS);
+  return stored ? JSON.parse(stored) : {};
+};
+
 // Clear all data (for testing/reset)
 export const clearAllData = (): void => {
   if (typeof window !== 'undefined') {
     Object.values(STORAGE_KEYS).forEach((key) => {
       localStorage.removeItem(key);
     });
+  }
+};
+
+// Saved Weekly Plans
+export const saveWeeklyPlans = (plans: WeeklyPlan[]): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEYS.SAVED_WEEKLY_PLANS, JSON.stringify(plans));
+  }
+};
+
+export const getWeeklyPlans = (): WeeklyPlan[] => {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem(STORAGE_KEYS.SAVED_WEEKLY_PLANS);
+  if (!stored) return [];
+  try {
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
   }
 };

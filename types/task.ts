@@ -7,6 +7,7 @@ export interface Task {
   done: boolean;
   date: string; // ISO date string (YYYY-MM-DD)
   createdAt: number; // timestamp
+  weeklyTaskId?: string; // Optional: links to weekly template
 }
 
 export interface TasksByDate {

@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 
 export default function AuthPage() {
   return (
@@ -15,19 +15,15 @@ export default function AuthPage() {
         </CardHeader>
         <CardBody className="space-y-6">
           <p className="text-gray-600 dark:text-gray-400">
-            Authentication features coming soon. This page is a placeholder for:
+            Sign in with Google to continue to your dashboard.
           </p>
-          <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400">
-            <li>User registration</li>
-            <li>Login</li>
-            <li>Session management</li>
-            <li>Firebase integration</li>
-          </ul>
-          <Link href="/">
-            <Button variant="primary" className="w-full">
-              Back to Dashboard
-            </Button>
-          </Link>
+          <Button
+            variant="primary"
+            className="w-full"
+            onClick={() => signIn('google', { callbackUrl: '/' })}
+          >
+            Continue with Google
+          </Button>
         </CardBody>
       </Card>
     </div>
