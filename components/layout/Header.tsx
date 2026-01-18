@@ -5,6 +5,7 @@ import { useDarkMode } from '@/hooks/useDarkMode';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 
 export const Header: React.FC = () => {
   const [isDark, toggleDarkMode] = useDarkMode();
@@ -59,6 +60,20 @@ export const Header: React.FC = () => {
                           Save Workout
                         </Link>
                         <Link
+                          href="/macros"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+                        >
+                          Know What You Are Eating
+                        </Link>
+                        <Link
+                          href="/health"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+                        >
+                          Health Calculators
+                        </Link>
+                        <Link
                           href="/analytics"
                           onClick={() => setIsMenuOpen(false)}
                           className="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
@@ -72,6 +87,16 @@ export const Header: React.FC = () => {
                         >
                           Settings
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            void signOut({ callbackUrl: '/auth' });
+                          }}
+                          className="block text-left w-full text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+                        >
+                          Logout
+                        </button>
                       </div>
                     </div>
                   </Card>
@@ -85,15 +110,6 @@ export const Header: React.FC = () => {
               </div>
             </Link>
           </div>
-
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              href="/"
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
-            >
-              Dashboard
-            </Link>
-          </nav>
 
           <div className="flex items-center gap-4">
             <Button

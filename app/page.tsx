@@ -7,11 +7,10 @@ import { TaskInput } from '@/components/dashboard/TaskInput';
 import { TaskList } from '@/components/dashboard/TaskList';
 import { AICoach } from '@/components/dashboard/AICoach';
 import { WeeklyPlanner } from '@/components/dashboard/WeeklyPlanner';
-import { getTasks, saveTasks, getCurrentMode, saveCurrentMode, getWeeklyTasks, saveWeeklyTasks } from '@/lib/storage';
+import { getTasks, saveTasks, getCurrentMode, saveCurrentMode, getWeeklyTasks } from '@/lib/storage';
 import { getDateString } from '@/lib/analytics';
 import { generateCoachFeedback, selectCoachMessage } from '@/lib/ai';
 import { generateDailyTasksFromWeekly } from '@/lib/weeklyTaskGenerator';
-import { handleModeTransition } from '@/lib/modeTransition';
 import type { Task, TasksByDate } from '@/types/task';
 import type { BodyTransformationMode } from '@/types/mode';
 import type { CoachFeedback } from '@/lib/ai';
@@ -105,33 +104,8 @@ export default function Dashboard() {
   };
 
   const handleModeChange = (mode: BodyTransformationMode) => {
-    // Get current weekly tasks
-    const weeklyTasks = getWeeklyTasks();
-    
-    // Handle mode transition (auto-pause old workouts, generate new ones)
-    const { updatedWeeklyTasks, newTaskCount, pausedTaskCount } = handleModeTransition(mode, weeklyTasks);
-    
-    // Save updated weekly tasks
-    saveWeeklyTasks(updatedWeeklyTasks);
-    
-    // Generate daily tasks from new weekly templates
-    const tasksWithGenerated = generateDailyTasksFromWeekly(updatedWeeklyTasks, allTasks);
-    
-    // Save if new tasks were generated
-    if (JSON.stringify(tasksWithGenerated) !== JSON.stringify(allTasks)) {
-      saveTasks(tasksWithGenerated);
-      setAllTasks(tasksWithGenerated);
-    }
-    
-    // Update mode
     setCurrentMode(mode);
     saveCurrentMode(mode);
-    
-    // Show notification if workouts were changed
-    if (newTaskCount > 0 || pausedTaskCount > 0) {
-      // Could add a toast notification here in the future
-      console.log(`Mode changed: ${pausedTaskCount} workouts paused, ${newTaskCount} new workouts added`);
-    }
   };
 
   const today = getDateString();
