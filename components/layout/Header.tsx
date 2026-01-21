@@ -1,15 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDarkMode } from '@/hooks/useDarkMode';
+import { useProgression } from '@/hooks/useProgression';
+import { useDisciplineScore } from '@/hooks/useDisciplineScore';
+import { getTasks } from '@/lib/storage';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
+import type { TasksByDate } from '@/types/task';
 
 export const Header: React.FC = () => {
   const [isDark, toggleDarkMode] = useDarkMode();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [allTasks, setAllTasks] = useState<TasksByDate>({});
+  const { currentLevel, xpProgress, title, streakLength, hasPerfectWeekThisWeek, isClient } = useProgression();
+  const { score, level, color, isClient: isDisciplineClient } = useDisciplineScore(allTasks);
+
+  useEffect(() => {
+    const tasks = getTasks();
+    setAllTasks(tasks);
+  }, []);
 
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
@@ -112,6 +124,33 @@ export const Header: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            {isClient && (
+              <div className="hidden sm:flex items-center gap-3">
+                <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Lv. {currentLevel}
+                </div>
+                <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-out"
+                    style={{ width: `${xpProgress * 100}%` }}
+                  />
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-300">
+                  {title}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  🔥 {streakLength || 0}
+                </div>
+                {isDisciplineClient && (
+                  <div className={`text-xs font-semibold ${color}`} title={`Discipline: ${level}`}>
+                    💎 {score.toFixed(0)}
+                  </div>
+                )}
+                {hasPerfectWeekThisWeek && (
+                  <div className="text-xs text-green-600 dark:text-green-400">⭐ Perfect Week</div>
+                )}
+              </div>
+            )}
             <Button
               variant="ghost"
               size="sm"

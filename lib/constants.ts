@@ -1,5 +1,7 @@
 import type { TaskCategory } from '@/types/task';
 import type { BodyTransformationMode as Mode, ModeConfig } from '@/types/mode';
+import type { DailyQuest, QuestType } from '@/types/dailyQuest';
+import type { LevelTitle } from '@/types/title';
 
 // Task Categories
 export const TASK_CATEGORIES: TaskCategory[] = [
@@ -24,6 +26,14 @@ export const CATEGORY_LABELS: Record<TaskCategory, string> = {
   Diet: '🥗 Diet',
   Mindset: '🧠 Mindset',
   Recovery: '😴 Recovery',
+};
+
+export const CATEGORY_XP_REWARDS: Record<TaskCategory, number> = {
+  Workout: 25,
+  Cardio: 20,
+  Diet: 15,
+  Mindset: 10,
+  Recovery: 15,
 };
 
 // Body Transformation Modes
@@ -308,6 +318,11 @@ export const STORAGE_KEYS = {
   ANALYTICS: 'ai_fitness_analytics',
   WEEKLY_PLAN: 'ai_fitness_weekly_plan',
   SAVED_WEEKLY_PLANS: 'ai_fitness_saved_weekly_plans',
+  PROGRESSION: 'ai_fitness_progression',
+  DAILY_QUESTS: 'ai_fitness_daily_quests',
+  SELECTED_TITLE: 'ai_fitness_selected_title',
+  DISCIPLINE_SCORE: 'ai_fitness_discipline_score',
+  PERSONAL_BESTS: 'ai_fitness_personal_bests',
 } as const;
 
 // App Config
@@ -317,3 +332,81 @@ export const APP_CONFIG = {
   MAX_TASKS_PER_DAY: 20,
   ANALYTICS_CACHE_DURATION: 60 * 60 * 1000, // 1 hour
 } as const;
+
+// Daily Quest Templates
+export const QUEST_TEMPLATES: Array<Omit<DailyQuest, 'id' | 'progress' | 'completed' | 'xpAwarded'>> = [
+  {
+    type: 'complete-tasks' as QuestType,
+    title: 'Task Master',
+    description: 'Complete 3 tasks today',
+    target: 3,
+    xpReward: 40,
+  },
+  {
+    type: 'complete-tasks' as QuestType,
+    title: 'Productive Day',
+    description: 'Complete 2 tasks today',
+    target: 2,
+    xpReward: 40,
+  },
+  {
+    type: 'workout' as QuestType,
+    title: 'Strength Builder',
+    description: 'Complete a workout',
+    target: 1,
+    xpReward: 40,
+  },
+  {
+    type: 'recovery' as QuestType,
+    title: 'Recovery Warrior',
+    description: 'Complete a recovery task',
+    target: 1,
+    xpReward: 40,
+  },
+];
+
+// Level Titles
+export const LEVEL_TITLES: LevelTitle[] = [
+  {
+    id: 'beginner',
+    name: 'Beginner',
+    minLevel: 1,
+    maxLevel: 3,
+    description: 'Just starting the journey',
+  },
+  {
+    id: 'consistent',
+    name: 'Consistent',
+    minLevel: 4,
+    maxLevel: 6,
+    description: 'Building solid habits',
+  },
+  {
+    id: 'relentless',
+    name: 'Relentless',
+    minLevel: 7,
+    maxLevel: 9,
+    description: 'Pushing through every challenge',
+  },
+  {
+    id: 'athlete',
+    name: 'Athlete',
+    minLevel: 10,
+    maxLevel: 14,
+    description: 'Elite performance mindset',
+  },
+  {
+    id: 'unbreakable',
+    name: 'Unbreakable',
+    minLevel: 15,
+    maxLevel: 19,
+    description: 'Unstoppable force of discipline',
+  },
+  {
+    id: 'apex',
+    name: 'Apex',
+    minLevel: 20,
+    maxLevel: null,
+    description: 'The ultimate peak of dedication',
+  },
+];

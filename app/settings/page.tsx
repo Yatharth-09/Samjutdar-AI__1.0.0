@@ -2,6 +2,7 @@
 
 import { Card, CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { TitleSelector } from '@/components/dashboard/TitleSelector';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { clearAllData } from '@/lib/storage';
 import { APP_CONFIG } from '@/lib/constants';
@@ -51,6 +52,9 @@ export default function SettingsPage() {
           </div>
         </CardBody>
       </Card>
+
+      {/* Title Selection */}
+      <TitleSelector />
 
       {/* Preferences */}
       <Card>

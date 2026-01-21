@@ -6,11 +6,14 @@ import { BodyMode } from '@/components/dashboard/BodyMode';
 import { TaskInput } from '@/components/dashboard/TaskInput';
 import { TaskList } from '@/components/dashboard/TaskList';
 import { AICoach } from '@/components/dashboard/AICoach';
+import { DailyQuests } from '@/components/dashboard/DailyQuests';
 import { WeeklyPlanner } from '@/components/dashboard/WeeklyPlanner';
 import { getTasks, saveTasks, getCurrentMode, saveCurrentMode, getWeeklyTasks } from '@/lib/storage';
 import { getDateString } from '@/lib/analytics';
 import { generateCoachFeedback, selectCoachMessage } from '@/lib/ai';
 import { generateDailyTasksFromWeekly } from '@/lib/weeklyTaskGenerator';
+import { useProgression } from '@/hooks/useProgression';
+import { useDailyQuests } from '@/hooks/useDailyQuests';
 import type { Task, TasksByDate } from '@/types/task';
 import type { BodyTransformationMode } from '@/types/mode';
 import type { CoachFeedback } from '@/lib/ai';
@@ -20,6 +23,8 @@ export default function Dashboard() {
   const [currentMode, setCurrentMode] = useState<BodyTransformationMode>('maintenance');
   const [coachFeedback, setCoachFeedback] = useState<CoachFeedback | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const { awardXP, applyCompletionBonuses } = useProgression();
+  const { quests } = useDailyQuests(allTasks);
 
   // Initialize from localStorage
   useEffect(() => {
@@ -77,14 +82,24 @@ export default function Dashboard() {
 
     setAllTasks(updated);
     saveTasks(updated);
+    // Apply completion-based bonuses (perfect week) after state persists
+    applyCompletionBonuses(updated);
   };
 
   const handleToggleTask = (taskId: string) => {
     const today = getDateString();
+    const currentTasks = allTasks[today] || [];
+    const task = currentTasks.find((t) => t.id === taskId);
+    
+    if (task && !task.done) {
+      // Award XP only when marking as complete
+      awardXP(task.category);
+    }
+
     const updated = {
       ...allTasks,
-      [today]: (allTasks[today] || []).map((task) =>
-        task.id === taskId ? { ...task, done: !task.done } : task
+      [today]: currentTasks.map((t) =>
+        t.id === taskId ? { ...t, done: !t.done } : t
       ),
     };
 
@@ -115,6 +130,9 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Mode Selector */}
       <BodyMode currentMode={currentMode} onModeChange={handleModeChange} />
+
+      {/* Daily Quests */}
+      <DailyQuests quests={quests} />
 
       {/* Weekly Planner */}
       <WeeklyPlanner currentMode={currentMode} allTasks={allTasks} />
